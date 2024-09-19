@@ -137,6 +137,15 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       return MouthType.frown; // Sad face
     }
   }
+  String _getMoodText(){
+    if (happinessLevel > 80){
+      return "Happy";
+    } else if (happinessLevel >= 30){
+      return "Neutral";
+    } else {
+      return "Unhappy";
+    }
+  }
 
   void _setPetName(BuildContext context) {
     showDialog(
@@ -223,11 +232,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             ),
             SizedBox(height: 16.0),
             Text('Name: $petName', style: TextStyle(fontSize: 20.0)),
-            SizedBox(height: 16.0),
+            Text('Mood: ${_getMoodText()}', style: TextStyle(fontSize: 20.0),),
             Text('Happiness Level: $happinessLevel', style: TextStyle(fontSize: 20.0)),
-            SizedBox(height: 16.0),
             Text('Hunger Level: $hungerLevel', style: TextStyle(fontSize: 20.0)),
-            SizedBox(height: 32.0),
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _playWithPet,
               child: Text('Play with Your Pet'),
@@ -238,18 +246,19 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               child: Text('Feed Your Pet'),
             ),
             TextField(
-              controller: myController, // Link the controller to the TextField
+              controller: myController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Custom pet name',
               ),
-              keyboardType: TextInputType.number, // Restrict input to numbers
+              keyboardType: TextInputType.number,
             ),
             ElevatedButton(
             onPressed: () {
               setState(() {
 
                 petName = myController.text;
+
               });
             },
             child: Text('submit'),
@@ -267,11 +276,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     super.dispose();
   }
 }
-
-// Enum to represent different types of mouth shapes
 enum MouthType { smile, neutral, frown }
-
-// CustomPainter to draw the mouth based on the happiness level
 class MouthPainter extends CustomPainter {
   final MouthType mouthType;
 
@@ -288,29 +293,27 @@ class MouthPainter extends CustomPainter {
     final radius = size.width / 2;
 
     if (mouthType == MouthType.smile) {
-      // Draw a smiling arc
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        pi, // Start angle (bottom)
-        pi, // Sweep angle (half circle)
-        false, // Use a non-filled arc
+        pi/4, 
+        pi/2, 
+        false, 
         paint,
       );
     } else if (mouthType == MouthType.neutral) {
-      // Draw a straight line
+     
       canvas.drawLine(
         Offset(0, size.height / 2),
         Offset(size.width, size.height / 2),
         paint,
       );
     } else if (mouthType == MouthType.frown) {
-      // Draw a frowning arc (inverted smile)
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        0, // Start angle (top)
-        pi, // Sweep angle (half circle)
-        false, // Use a non-filled arc
-        paint,
+        Rect.fromCircle(center: Offset(center.dx, center.dy + 50), radius: radius), 
+            pi,  // Start angle (top of the circle)
+           pi,  // Sweep angle (half circle to create a frown)
+           false, 
+           paint,
       );
     }
   }
