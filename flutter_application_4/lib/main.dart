@@ -14,12 +14,13 @@ class DigitalPetApp extends StatefulWidget {
 }
 
 class _DigitalPetAppState extends State<DigitalPetApp> {
-  String petName = "Your Pet";
+  String petName = "";
   int happinessLevel = 50;
   int hungerLevel = 50;
   Timer? _hungerTimer;
   Timer? _happinessTimer;
   int happinessTimerSeconds = 0;
+  final TextEditingController myController = TextEditingController();
 
   @override
   void initState() {
@@ -79,7 +80,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   }
 
   void _checkGameOver() {
-    if (hungerLevel >= 100 || happinessLevel <= 10) {
+    if (hungerLevel >= 100 && happinessLevel <= 10) {
       _hungerTimer?.cancel();
       _happinessTimer?.cancel();
       _showGameOverDialog('Game Over', 'Your pet is too unhappy or hungry!');
@@ -236,6 +237,23 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               onPressed: _feedPet,
               child: Text('Feed Your Pet'),
             ),
+            TextField(
+              controller: myController, // Link the controller to the TextField
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Custom pet name',
+              ),
+              keyboardType: TextInputType.number, // Restrict input to numbers
+            ),
+            ElevatedButton(
+            onPressed: () {
+              setState(() {
+
+                petName = myController.text;
+              });
+            },
+            child: Text('submit'),
+          ),
           ],
         ),
       ),
