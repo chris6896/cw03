@@ -17,7 +17,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet";
   int happinessLevel = 50;
   int hungerLevel = 50;
-  Timer? _timer;
+  Timer? _hungerTimer;
+  Timer? _happinessTimer;
+  int happinessTimerSeconds = 0;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel = (happinessLevel + 10).clamp(0, 100).toInt();
       _updateHunger();
       _checkGameOver();
+      _startHappinessTimerIfNeeded();
     });
   }
 
@@ -38,6 +41,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       hungerLevel = (hungerLevel - 10).clamp(0, 100).toInt();
       _updateHappiness();
       _checkGameOver();
+      _startHappinessTimerIfNeeded();
     });
   }
 
@@ -54,7 +58,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   }
 
   void _startHungerTimer() {
-    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+    _hungerTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       setState(() {
         hungerLevel = (hungerLevel + 10).clamp(0, 100).toInt();
         _checkGameOver();
@@ -62,12 +66,26 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     });
   }
 
+  void _startHappinessTimerIfNeeded() {
+    if (happinessLevel >= 80 && _happinessTimer == null) {
+      happinessTimerSeconds = 0;
+      _happinessTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        setState(() {
+          happinessTimerSeconds++;
+          _checkGameOver();
+        });
+      });
+    }
+  }
+
   void _checkGameOver() {
     if (hungerLevel >= 100 || happinessLevel <= 10) {
-      _timer?.cancel();
+      _hungerTimer?.cancel();
+      _happinessTimer?.cancel();
       _showGameOverDialog('Game Over', 'Your pet is too unhappy or hungry!');
-    } else if (happinessLevel >= 80) {
-      _timer?.cancel();
+    } else if (happinessTimerSeconds >= 180) {
+      _hungerTimer?.cancel();
+      _happinessTimer?.cancel();
       _showGameOverDialog('You Win', 'Your pet is very happy!');
     }
   }
@@ -87,6 +105,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
                 setState(() {
                   happinessLevel = 50;
                   hungerLevel = 50;
+                  _happinessTimer?.cancel();
+                  _happinessTimer = null; // Reset happiness timer
                   _startHungerTimer();
                 });
               },
@@ -107,7 +127,6 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
-  // Determine mouth style based on happiness level
   MouthType _getMouthType() {
     if (happinessLevel > 70) {
       return MouthType.smile; // Happy face
@@ -225,7 +244,8 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _hungerTimer?.cancel();
+    _happinessTimer?.cancel();
     super.dispose();
   }
 }
